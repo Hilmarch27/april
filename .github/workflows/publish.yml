@@ -23,5 +23,8 @@ jobs:
       # Verify Bun installation
       - run: bun --version
       
+      # Install JSR
+      - run: bun install
+
       # Publish to JSR
       - run: bun x jsr publish
