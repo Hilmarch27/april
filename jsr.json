@@ -1,0 +1,10 @@
+{
+  "name": "@hilmarch/april",
+  "version": "0.1.5",
+  "license": "MIT",
+  "exports": "./src/index.ts",
+  "publish": {
+    "include": ["src/**", "package.json", "tsconfig.json", "README.md", "bun.lockb"],
+    "exclude": ["test/**", "vitest.config.ts", "**/*.test.ts", "node_modules/**"]
+  }
+}

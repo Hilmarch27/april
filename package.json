@@ -1,0 +1,23 @@
+{
+  "name": "april",
+  "module": "./src/index.ts",
+  "type": "module",
+  "scripts": {
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:ui": "vitest --ui"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@vitest/ui": "^2.1.6",
+    "vitest": "^2.1.6"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0"
+  }
+}
