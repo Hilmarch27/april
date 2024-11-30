@@ -26,5 +26,5 @@ jobs:
       # Install JSR
       - run: bun install
 
-      # Publish to JSR
-      - run: bun x jsr publish
+      # Publish to JSR dengan flag --allow-dirty
+      - run: bun x jsr publish --allow-dirty
