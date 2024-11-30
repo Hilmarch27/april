@@ -15,4 +15,6 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
+      - run: curl -fsSL https://bun.sh/install | bash
+      - run: export PATH="$HOME/.bun/bin:$PATH"
       - run: bunx jsr publish
