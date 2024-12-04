@@ -62,9 +62,6 @@ export class Currency {
 
   /**
    * Formats a number to include thousand separators with dots (.) and two decimal points.
-   * @param {number|string} number The number to format
-   * @param {string} currencySymbol The currency symbol to prepend (default: "Rp")
-   * @returns {string} The formatted number with thousand separators
    */
   static format(number: number | string, currencySymbol = "Rp"): string {
     if (number === undefined || number === null) {
@@ -84,9 +81,6 @@ export class Currency {
 
   /**
    * Rounds a number to the nearest integer or to a specified number of decimal places.
-   * @param {number|string} number The number to round
-   * @param {number} decimalPlaces The number of decimal places (default: 2)
-   * @returns {number} The rounded number
    */
   static round(number: number | string, decimalPlaces = 2): number {
     if (number === undefined || number === null) {

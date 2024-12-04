@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import CryptoJS from "crypto-js";
 
 /**
  * Configuration type for AES encryption
@@ -20,11 +20,7 @@ export class AES {
    * @returns Processed hash
    */
   private static generateSecret(secret: string, length: number): string {
-    return crypto
-      .createHash("sha512")
-      .update(secret)
-      .digest("hex")
-      .substring(0, length);
+    return CryptoJS.SHA512(secret).toString().substring(0, length);
   }
 
   /**
@@ -38,16 +34,36 @@ export class AES {
       throw new Error("Data to encrypt cannot be empty");
     }
 
-    const encryptionMethod = config.encryptionMethod || "aes-256-cbc";
-    const key = AES.generateSecret(config.secretKey, 32);
-    const iv = AES.generateSecret(config.secretIV, 16);
+    // Validasi metode enkripsi
+    const validMethods = ["aes-256-cbc", "aes-128-cbc", "aes-256-ecb"];
+    if (
+      config.encryptionMethod &&
+      !validMethods.includes(config.encryptionMethod)
+    ) {
+      throw new Error(
+        `Encryption failed: Invalid encryption method ${config.encryptionMethod}`
+      );
+    }
+
+    const key = CryptoJS.enc.Utf8.parse(
+      this.generateSecret(config.secretKey, 32)
+    );
+    const iv = CryptoJS.enc.Utf8.parse(
+      this.generateSecret(config.secretIV, 16)
+    );
 
     try {
-      const cipher = crypto.createCipheriv(encryptionMethod, key, iv);
-      const encryptedData = Buffer.from(
-        cipher.update(data, "utf8", "hex") + cipher.final("hex")
-      ).toString("base64");
-      return encryptedData;
+      const encrypted = CryptoJS.AES.encrypt(
+        CryptoJS.enc.Utf8.parse(data),
+        key,
+        {
+          iv: iv,
+          mode: CryptoJS.mode.CBC,
+          padding: CryptoJS.pad.Pkcs7,
+        }
+      );
+
+      return encrypted.toString();
     } catch (error) {
       throw new Error(
         `Encryption failed: ${
@@ -68,17 +84,32 @@ export class AES {
       throw new Error("Encrypted data cannot be empty");
     }
 
-    const encryptionMethod = config.encryptionMethod || "aes-256-cbc";
-    const key = AES.generateSecret(config.secretKey, 32);
-    const iv = AES.generateSecret(config.secretIV, 16);
+    // Validasi metode enkripsi
+    const validMethods = ["aes-256-cbc", "aes-128-cbc", "aes-256-ecb"];
+    if (
+      config.encryptionMethod &&
+      !validMethods.includes(config.encryptionMethod)
+    ) {
+      throw new Error(
+        `Decryption failed: Invalid encryption method ${config.encryptionMethod}`
+      );
+    }
+
+    const key = CryptoJS.enc.Utf8.parse(
+      this.generateSecret(config.secretKey, 32)
+    );
+    const iv = CryptoJS.enc.Utf8.parse(
+      this.generateSecret(config.secretIV, 16)
+    );
 
     try {
-      const buff = Buffer.from(encryptedData, "base64");
-      const decipher = crypto.createDecipheriv(encryptionMethod, key, iv);
-      const decryptedData =
-        decipher.update(buff.toString("utf8"), "hex", "utf8") +
-        decipher.final("utf8");
-      return decryptedData;
+      const decrypted = CryptoJS.AES.decrypt(encryptedData, key, {
+        iv: iv,
+        mode: CryptoJS.mode.CBC,
+        padding: CryptoJS.pad.Pkcs7,
+      });
+
+      return decrypted.toString(CryptoJS.enc.Utf8);
     } catch (error) {
       throw new Error(
         `Decryption failed: ${
