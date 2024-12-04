@@ -1,16 +1,9 @@
 import * as XLSX from "xlsx";
-import * as fs from "fs";
-import * as path from "path";
 
 /**
  * Options for downloading Excel
  */
 interface ExcelDownloadOptions {
-  /** Name for file
-   * @example data.xlsx/csv
-   */
-  fileName?: string;
-
   /** Sheet name in Excel
    * @example Sheet1
    */
@@ -21,7 +14,7 @@ interface ExcelDownloadOptions {
    */
   excludeColumns?: string[];
 
-  /** tranform data 
+  /** transform data 
    * @example transformData: (item) => ({
       ...item,
       name: item.name.toUpperCase(),
@@ -37,11 +30,6 @@ interface ExcelDownloadOptions {
   headerMapping?: {
     [originalHeader: string]: string;
   };
-
-  /** Save to server
-   * @example saveToServer: true or false
-   */
-  saveToServer?: boolean;
 }
 
 /**
@@ -52,9 +40,8 @@ export class JsonDownloader {
    * Generate Excel file from JSON
    * @param data Array of objects to be downloaded
    * @param options configuration optional to be downloaded
-   * @returns Buffer Excel or path file
+   * @returns Buffer Excel
    * @example JsonDownloader.generateExcel(data, {
-   * fileName: "data.xlsx",
    * sheetName: "Sheet1",
    * excludeColumns: ["column1", "column2"]
    * headerMapping: {
@@ -65,15 +52,13 @@ export class JsonDownloader {
   static generateExcel(
     data: any[],
     options: ExcelDownloadOptions = {}
-  ): Buffer | string {
+  ): Buffer {
     // Default options
     const {
-      fileName = "data.xlsx",
       sheetName = "Sheet1",
       excludeColumns = [],
       transformData,
       headerMapping = {},
-      saveToServer = false,
     } = options;
 
     // Transform data jika ada fungsi transformasi
@@ -106,29 +91,18 @@ export class JsonDownloader {
     XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
 
     // Generate Excel buffer
-    const excelBuffer = XLSX.write(workbook, {
+    return XLSX.write(workbook, {
       type: "buffer",
       bookType: "xlsx",
     });
-
-    // Jika saveToServer true, simpan file di server
-    if (saveToServer) {
-      const filePath = path.resolve(process.cwd(), fileName);
-      fs.writeFileSync(filePath, excelBuffer);
-      return filePath;
-    }
-
-    // Kembalikan buffer untuk download langsung
-    return excelBuffer;
   }
 
   /**
    * Generate CSV file from JSON
    * @param data Array of objects to be downloaded
    * @param options Optional configuration for download
-   * @returns string CSV or file path
+   * @returns CSV string
    * @example JsonDownloader.generateCSV(data, {
-   * fileName?: "data.csv",
    * delimiter?: ";",
    * excludeColumns?: ["column1", "column2"]
    * headerMapping
@@ -140,14 +114,12 @@ export class JsonDownloader {
     options: Omit<ExcelDownloadOptions, "sheetName"> & {
       delimiter?: string;
     } = {}
-  ): string | string {
+  ): string {
     const {
-      fileName = "data.csv",
       excludeColumns = [],
       delimiter = ",",
       transformData,
       headerMapping = {},
-      saveToServer = false,
     } = options;
 
     // Transform data jika ada fungsi transformasi
@@ -174,7 +146,7 @@ export class JsonDownloader {
     const headers = Object.keys(mappedData[0] || {}).join(delimiter);
 
     // Konversi ke CSV
-    const csv = [
+    return [
       headers,
       ...mappedData.map((row) =>
         Object.values(row)
@@ -184,15 +156,5 @@ export class JsonDownloader {
           .join(delimiter)
       ),
     ].join("\n");
-
-    // Jika saveToServer true, simpan file di server
-    if (saveToServer) {
-      const filePath = path.resolve(process.cwd(), fileName);
-      fs.writeFileSync(filePath, csv, { encoding: "utf-8" });
-      return filePath;
-    }
-
-    // Kembalikan string CSV
-    return csv;
   }
 }
