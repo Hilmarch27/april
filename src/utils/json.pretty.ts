@@ -89,7 +89,7 @@ export class Csl {
   /**
    * Warna standar untuk berbagai tipe data
    */
-  static colors = {
+  static colors: Record<string, ColorFunction> = {
     null: this.getColorFunction("red"),
     undefined: this.getColorFunction("yellow"),
     string: this.getColorFunction("green"),
