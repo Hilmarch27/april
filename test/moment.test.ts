@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "bun:test";
 import { Moment } from "../src/utils/moment"; // Gantilah dengan import yang sesuai
 
 describe("Moment.period", () => {

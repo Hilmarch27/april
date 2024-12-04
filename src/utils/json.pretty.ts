@@ -1,9 +1,13 @@
 type ColorFunction = (text: string) => string;
 
 /**
- * Utility untuk pewarnaan console di berbagai platform
+ * Utility for coloring console logs
+ * @example
+ * Csl.log('green', 'Operation successful');
+ * 
+ * check the available colors with Csl.getAvailableColors()
  */
-class ConsoleColor {
+export class Csl {
   // Warna untuk browser console
   private static browserColors = {
     reset: "color: inherit",
@@ -64,6 +68,25 @@ class ConsoleColor {
   }
 
   /**
+   * Metode statis untuk log berwarna langsung
+   */
+  static log(color: keyof typeof this.nodeColors, ...messages: any[]): void {
+    const env = this.detectEnvironment();
+    const colorFunction = this.getColorFunction(color);
+
+    messages.forEach((msg) => {
+      const formattedMsg =
+        typeof msg === "object" ? JSON.stringify(msg, null, 2) : String(msg);
+
+      if (env === "browser") {
+        colorFunction(formattedMsg);
+      } else {
+        console.log(colorFunction(formattedMsg));
+      }
+    });
+  }
+
+  /**
    * Warna standar untuk berbagai tipe data
    */
   static colors = {
@@ -75,6 +98,13 @@ class ConsoleColor {
     array: this.getColorFunction("white"),
     object: this.getColorFunction("white"),
   };
+
+  /**
+   * Metode untuk mendapatkan semua warna yang tersedia
+   */
+  static getAvailableColors(): string[] {
+    return Object.keys(this.nodeColors).filter((color) => color !== "reset");
+  }
 }
 
 /**
@@ -102,6 +132,12 @@ interface JsonPrettyOptions {
 
 /**
  * Utility untuk memformat JSON dengan berbagai opsi
+ * @example
+ * const formattedJson = JsonPretty.format(data); 
+ * // default options
+ * const formattedJson = JsonPretty.format(data, { showDataType: true 
+ * }); 
+ * // custom options
  */
 export class JsonPretty {
   /**
@@ -120,10 +156,10 @@ export class JsonPretty {
     ): string => {
       const applyColor = (
         text: string,
-        colorType: keyof typeof ConsoleColor.colors
+        colorType: keyof typeof Csl.colors
       ) => {
         if (!colorize) return text;
-        return ConsoleColor.colors[colorType](text);
+        return Csl.colors[colorType](text);
       };
 
       if (value === null) {
@@ -221,7 +257,7 @@ export class JsonPretty {
    * @param error - Objek error yang akan dicetak
    */
   static printError(error: unknown): void {
-    const errorColor = ConsoleColor.getColorFunction("red");
+    const errorColor = Csl.getColorFunction("red");
 
     if (error instanceof Error) {
       // Untuk Error standar JavaScript

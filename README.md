@@ -27,15 +27,18 @@ console.log(colors.green(decrypted));
 ### JsonPretty
 
 ```
-import { ConsoleColor } from '@hilmarch/april';
+<!-- Membuat console berwarna -->
+import { Csl } from '@hilmarch/april';
 
-// Membuat fungsi pewarnaan
-const redText = ConsoleColor.getColorFunction("red");
-const greenText = ConsoleColor.getColorFunction("green");
-
-// Menggunakan fungsi pewarnaan
-console.log(redText("Ini adalah teks merah"));
-console.log(greenText("Ini adalah teks hijau"));
+Csl.log('green', 'Console Green');
+Csl.log('blue', 'Console Blue');
+Csl.log('cyan', 'Console Cyan');
+Csl.log('gray', 'Console Gray');
+Csl.log('magenta', 'Console Magenta');
+Csl.log('red', 'Console Red');
+Csl.log('reset', 'Console Reset');
+Csl.log('white', 'Console White');
+Csl.log('yellow', 'Console Yellow');
 ```
 
 ```

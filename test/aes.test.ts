@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { encryptData, decryptData } from "../src/utils/aes";
+import { describe, it, expect } from "bun:test";
+import { AES} from "../src/utils/aes";
 import type { AESConfig } from "../src/utils/aes";
 
 // Mocked secret key and IV for testing
@@ -14,26 +14,26 @@ const testData = "Hello, World!";
 
 describe("AES Encryption/Decryption", () => {
   it("should encrypt data correctly", () => {
-    const encryptedData = encryptData(testData, config);
+    const encryptedData = AES.encrypt(testData, config);
     expect(encryptedData).toBeDefined(); // The result should be a valid encrypted string
     expect(typeof encryptedData).toBe("string");
     expect(encryptedData).not.toBe(testData); // Encrypted data should be different from original
   });
 
   it("should decrypt data correctly", () => {
-    const encryptedData = encryptData(testData, config);
-    const decryptedData = decryptData(encryptedData, config);
+    const encryptedData = AES.encrypt(testData, config);
+    const decryptedData = AES.decrypt(encryptedData, config);
     expect(decryptedData).toBe(testData); // The decrypted data should match the original
   });
 
   it("should throw an error if encrypting empty data", () => {
-    expect(() => encryptData("", config)).toThrowError(
+    expect(() => AES.encrypt("", config)).toThrowError(
       "Data to encrypt cannot be empty"
     );
   });
 
   it("should throw an error if decrypting empty data", () => {
-    expect(() => decryptData("", config)).toThrowError(
+    expect(() => AES.decrypt("", config)).toThrowError(
       "Encrypted data cannot be empty"
     );
   });
@@ -45,11 +45,11 @@ describe("AES Encryption/Decryption", () => {
       encryptionMethod: "invalid-method" as any, // Invalid method
     };
 
-    expect(() => encryptData(testData, invalidConfig)).toThrowError(
+    expect(() => AES.encrypt(testData, invalidConfig)).toThrowError(
       "Encryption failed:"
     );
     expect(() =>
-      decryptData("invalidEncryptedData", invalidConfig)
+      AES.decrypt("invalidEncryptedData", invalidConfig)
     ).toThrowError("Decryption failed:");
   });
 });
