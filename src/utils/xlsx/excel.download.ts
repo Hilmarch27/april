@@ -3,7 +3,7 @@ import * as XLSX from "xlsx";
 /**
  * Options for downloading Excel
  */
-interface ExcelDownloadOptions {
+export interface ExcelDownloadOptions {
   /** Sheet name in Excel
    * @example Sheet1
    */

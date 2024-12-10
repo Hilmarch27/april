@@ -150,17 +150,60 @@ export class ExcelParser<T> {
 
               if (fieldSchema) {
                 try {
-                  // Check if it's a number schema
+                  // Comprehensive type conversions for Zod types
                   if (fieldSchema instanceof z.ZodNumber) {
-                    value = Number(value);
+                    // Convert to number, handle various input types
+                    value =
+                      value === ""
+                        ? null
+                        : value === null
+                        ? null
+                        : Number(value);
                   }
                   // Check if it's a string schema
                   else if (fieldSchema instanceof z.ZodString) {
-                    value = String(value).trim();
+                    // Convert to trimmed string, handle null/undefined
+                    value =
+                      value === null || value === undefined
+                        ? ""
+                        : String(value).trim();
                   }
-                  // Add more type checks if needed
+                  // Boolean conversion
+                  else if (fieldSchema instanceof z.ZodBoolean) {
+                    // Handle various truthy/falsy representations
+                    value =
+                      value === true ||
+                      value === "true" ||
+                      value === "1" ||
+                      value === 1;
+                  }
+                  // Date conversion
+                  else if (fieldSchema instanceof z.ZodDate) {
+                    // Handle different date formats
+                    value = value ? new Date(value) : null;
+                  }
+                  // Array conversion
+                  else if (fieldSchema instanceof z.ZodArray) {
+                    // Convert to array if not already
+                    value = Array.isArray(value) ? value : value ? [value] : [];
+                  }
+                  // Enum conversion
+                  else if (fieldSchema instanceof z.ZodEnum) {
+                    // Ensure value is a valid enum value
+                    value = fieldSchema.options.includes(value) ? value : null;
+                  }
+                  // Optional type handling
+                  else if (fieldSchema instanceof z.ZodOptional) {
+                    // Keep the value if it's not undefined
+                    value = value !== undefined ? value : null;
+                  }
+                  // Nullable type handling
+                  else if (fieldSchema instanceof z.ZodNullable) {
+                    // Allow null values
+                    value = value === "" ? null : value;
+                  }
                 } catch (error) {
-                  // If transformation fails, keep original value
+                  // If transformation fails, log warning and keep original value
                   console.warn(
                     `Automatic transformation failed for ${targetField}:`,
                     error

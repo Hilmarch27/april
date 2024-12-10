@@ -4,6 +4,124 @@
 
 # Example
 
+### JsonDownloader
+
+```
+function DataExportComponent() {
+  const [userData, setUserData] = useState([
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'User' }
+  ]);
+
+  const handleExcelExport = () => {
+    const excelBuffer = JsonDownloader.generateExcel(userData, {
+      sheetName: 'User List',
+      excludeColumns: ['id'],
+      transformData: (user) => ({
+        ...user,
+        name: user.name.toUpperCase()
+      }),
+      headerMapping: {
+        name: 'Full Name',
+        email: 'Contact Email'
+      }
+    });
+
+    // Additional logic to trigger file download
+    const blob = new Blob([excelBuffer], { 
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+    });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'users.xlsx');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
+
+  const handleCSVExport = () => {
+    const csvContent = JsonDownloader.generateCSV(userData, {
+      delimiter: ';',
+      excludeColumns: ['id']
+    });
+
+    // Trigger CSV download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'users.csv');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
+
+  return (
+    <div>
+      <button onClick={handleExcelExport}>Export to Excel</button>
+      <button onClick={handleCSVExport}>Export to CSV</button>
+    </div>
+  );
+}
+```
+
+### ExcelParser
+
+```
+// 1. Define Schema
+const ProductSchema = z.object({
+  name: z.string().min(2),
+  price: z.number().positive(),
+  stock: z.number().int().min(0),
+  is_available: z.boolean()
+});
+
+type Product = z.infer<typeof ProductSchema>;
+
+// 2. Configure Parser
+const productParserOptions: ExcelParserOptions<Product> = {
+  expectedHeaders: ['Product Name', 'Price', 'Stock', 'Available'],
+  schema: ProductSchema,
+  fieldMapping: {
+    'Product Name': 'name',
+    'Price': 'price',
+    'Stock': 'stock',
+    'Available': 'is_available'
+  }
+  transformations: {
+  name: (value) => value.toLowerCase().trim(),
+  Price: (value) => {
+    const numPrice = Number(value);
+    return isNaN(numPrice) ? null : numPrice;
+    }
+  }
+};
+
+// 3. Create Parser Instance
+const productParser = new ExcelParser<Product>(productParserOptions);
+
+// 4. Usage in React Component
+function ProductUploader() {
+  const handleFileUpload = async (file: File) => {
+    try {
+      const products = await productParser.parseExcel(file);
+      // Process validated products
+    } catch (error) {
+      // Handle parsing errors
+    }
+  };
+
+  return (
+    <input
+      type="file"
+      accept=".xlsx,.xls"
+      onChange={(e) => handleFileUpload(e.target.files[0])}
+    />
+  );
+}
+```
+
 ### logger
 
 ```
