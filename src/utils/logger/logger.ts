@@ -1,13 +1,5 @@
 import { Csl } from "../json.pretty";
 
-// Augment the global Console interface to include new methods
-declare global {
-  interface Console {
-    success(...args: any[]): void;
-    verbose(...args: any[]): void;
-  }
-}
-
 // Define log levels
 export type LogLevel =
   | "info"
@@ -18,7 +10,7 @@ export type LogLevel =
   | "verbose";
 
 // Configuration interface
-interface LoggerConfig {
+export interface LoggerConfig {
   /**
    * Global log levels to enable
    */
@@ -41,9 +33,17 @@ interface LoggerConfig {
 }
 
 /**
+ * Enhanced Console interface with optional methods
+ */
+export interface EnhancedConsole extends Console {
+  success?: (...args: any[]) => void;
+  verbose?: (...args: any[]) => void;
+}
+
+/**
  * Advanced Logger with flexible configuration
  */
-class Logger {
+export class Logger {
   // Singleton instance
   private static instance: Logger;
 
@@ -63,9 +63,29 @@ class Logger {
   // Current environment
   private currentEnv: string;
 
+  // Log queue for handling logs before environment is fully set
+  private logQueue: Array<{
+    level: LogLevel;
+    color: any;
+    args: any[];
+  }> = [];
+
   private constructor() {
     // Detect environment, default to development
-    this.currentEnv = process.env.NODE_ENV || "development";
+    this.currentEnv = this.detectEnvironment();
+  }
+
+  /**
+   * Detect current environment
+   */
+  private detectEnvironment(): string {
+    // Check various environment variables
+    const env =
+      process.env.NODE_ENV ||
+      process.env.ENVIRONMENT ||
+      process.env.ENV ||
+      "development";
+    return env.toLowerCase();
   }
 
   /**
@@ -97,14 +117,31 @@ class Logger {
    * Set current environment
    */
   public setEnvironment(env: string): Logger {
-    this.currentEnv = env;
+    // Normalize environment string
+    this.currentEnv = env.toLowerCase();
+
+    // Process any queued logs with new environment settings
+    this.processLogQueue();
+
     return this;
+  }
+
+  /**
+   * Get current environment
+   */
+  public getEnvironment(): string {
+    return this.currentEnv;
   }
 
   /**
    * Check if a log level is enabled
    */
   private isLevelEnabled(level: LogLevel): boolean {
+    // Ensure environment is set
+    if (!this.currentEnv) {
+      this.currentEnv = this.detectEnvironment();
+    }
+
     // Check environment-specific config first
     const envConfig = this.config.environments?.[this.currentEnv];
 
@@ -118,11 +155,23 @@ class Logger {
   }
 
   /**
+   * Process log queue after environment change
+   */
+  private processLogQueue(): void {
+    while (this.logQueue.length > 0) {
+      const logEntry = this.logQueue.shift();
+      if (logEntry) {
+        this.log(logEntry.level, logEntry.color, ...logEntry.args);
+      }
+    }
+  }
+
+  /**
    * Internal log method
    */
   private log(
     level: LogLevel,
-    color: keyof (typeof Csl)["nodeColors"],
+    color: any,
     ...args: any[]
   ): void {
     // Check if logging is enabled for this level
@@ -168,22 +217,29 @@ class Logger {
    * Custom color logging
    */
   public customLog(
-    color: keyof (typeof Csl)["nodeColors"],
+    color: any,
     ...args: any[]
   ): void {
     Csl.log(color, ...args);
   }
+
+  /**
+   * Extend console with logger methods
+   */
+  public extendConsole(consoleObj: EnhancedConsole = console): void {
+    consoleObj.info = (...args: any[]) => this.info(...args);
+    consoleObj.success = (...args: any[]) => this.success(...args);
+    consoleObj.warn = (...args: any[]) => this.warn(...args);
+    consoleObj.error = (...args: any[]) => this.error(...args);
+    consoleObj.debug = (...args: any[]) => this.debug(...args);
+    consoleObj.verbose = (...args: any[]) => this.verbose(...args);
+  }
 }
 
-// Global logger instance
-export const logger = Logger.getInstance();
+// Explicitly typed logger instance
+export const logger: Logger = Logger.getInstance();
 
-// Optionally extend console (can be disabled if needed)
+// Optional console extension (now a method call instead of global augmentation)
 if (typeof console !== "undefined") {
-  console.info = (...args: any[]) => logger.info(...args);
-  console.success = (...args: any[]) => logger.success(...args);
-  console.warn = (...args: any[]) => logger.warn(...args);
-  console.error = (...args: any[]) => logger.error(...args);
-  console.debug = (...args: any[]) => logger.debug(...args);
-  console.verbose = (...args: any[]) => logger.verbose(...args);
+  logger.extendConsole();
 }

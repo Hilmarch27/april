@@ -11,7 +11,11 @@
 logger.info('This is an info message');
 logger.success('Operation completed');
 
+// Set environment (optional, as it auto-detects from NODE_ENV)
+logger.setEnvironment('development');
+
 // Configure globally
+
 logger.configure({
   // Default levels for all environments
   enabledLevels: ['info', 'error'],
@@ -36,9 +40,6 @@ logger.configure({
     return [`[${level.toUpperCase()}]`, ...args];
   }
 });
-
-// Set environment (optional, as it auto-detects from NODE_ENV)
-logger.setEnvironment('development');
 ```
 
 ### AES
