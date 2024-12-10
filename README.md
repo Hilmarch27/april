@@ -4,6 +4,43 @@
 
 # Example
 
+### logger
+
+```
+// Basic usage
+logger.info('This is an info message');
+logger.success('Operation completed');
+
+// Configure globally
+logger.configure({
+  // Default levels for all environments
+  enabledLevels: ['info', 'error'],
+
+  // Environment-specific configurations
+  environments: {
+    development: {
+      enabledLevels: ['info', 'success', 'warn', 'error', 'debug', 'verbose']
+    },
+    production: {
+      enabledLevels: ['error', 'warn'], // Only critical logs
+      disabled: false // Optional: completely disable logging
+    },
+    test: {
+      enabledLevels: ['debug'] // Only debug logs in test
+    }
+  },
+
+  // Optional transformer to modify log arguments
+  transformer: (level, ...args) => {
+    // Add timestamp or additional context
+    return [`[${level.toUpperCase()}]`, ...args];
+  }
+});
+
+// Set environment (optional, as it auto-detects from NODE_ENV)
+logger.setEnvironment('development');
+```
+
 ### AES
 
 ```
@@ -88,6 +125,7 @@ console.log(Currency.round(null)); // 0
 console.log(Currency.toWords(1000)); // "Seribu Rupiah"
 console.log(Currency.toWords(12345)); // "Dua Belas Ribu Tiga Ratus Empat Puluh Lima Rupiah"
 ```
+
 ### Moment
 
 ```
@@ -113,4 +151,5 @@ console.log(Moment.toUTC(new Date())); // "2024-11-30T07:25:30.000Z"
 console.log(Moment.period("2024-11-01","2024-11-30")); // false
 
 ```
+
 ### @hilmarch27
