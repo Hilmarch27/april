@@ -28,8 +28,8 @@ function DataExportComponent() {
     });
 
     // Additional logic to trigger file download
-    const blob = new Blob([excelBuffer], { 
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+    const blob = new Blob([excelBuffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -122,44 +122,6 @@ function ProductUploader() {
 }
 ```
 
-### logger
-
-```
-// Basic usage
-logger.info('This is an info message');
-logger.success('Operation completed');
-
-// Set environment (optional, as it auto-detects from NODE_ENV)
-logger.setEnvironment('development');
-
-// Configure globally
-
-logger.configure({
-  // Default levels for all environments
-  enabledLevels: ['info', 'error'],
-
-  // Environment-specific configurations
-  environments: {
-    development: {
-      enabledLevels: ['info', 'success', 'warn', 'error', 'debug', 'verbose']
-    },
-    production: {
-      enabledLevels: ['error', 'warn'], // Only critical logs
-      disabled: false // Optional: completely disable logging
-    },
-    test: {
-      enabledLevels: ['debug'] // Only debug logs in test
-    }
-  },
-
-  // Optional transformer to modify log arguments
-  transformer: (level, ...args) => {
-    // Add timestamp or additional context
-    return [`[${level.toUpperCase()}]`, ...args];
-  }
-});
-```
-
 ### AES
 
 ```
@@ -178,46 +140,6 @@ console.log(colors.green(decrypted));
 // output:
 // encrypted: YWRkNjgzZjQxN2E0OWU4ZTc1YjZiMWRiYmZmMTc2MTA=
 // decrypted: hello world
-```
-
-### JsonPretty
-
-```
-<!-- Membuat console berwarna -->
-import { Csl } from '@hilmarch/april';
-
-Csl.log('green', 'Console Green');
-Csl.log('blue', 'Console Blue');
-Csl.log('cyan', 'Console Cyan');
-Csl.log('gray', 'Console Gray');
-Csl.log('magenta', 'Console Magenta');
-Csl.log('red', 'Console Red');
-Csl.log('reset', 'Console Reset');
-Csl.log('white', 'Console White');
-Csl.log('yellow', 'Console Yellow');
-```
-
-```
-import { JsonPretty } from '@hilmarch/april';
-
-const data = {
-  name: "John",
-  age: 30,
-  hobbies: ["reading", "gaming"],
-  active: true,
-};
-
-// Format data dengan indentasi 4 spasi
-const formatted = JsonPretty.format(data, { indent: 4 });
-console.log(formatted);
-
-// Format data dengan deskripsi tipe data
-const formattedWithTypes = JsonPretty.format(data, { showDataType: true });
-console.log(formattedWithTypes);
-
-// Format data tanpa pewarnaan
-const plainText = JsonPretty.format(data, { colorize: false });
-console.log(plainText);
 ```
 
 ### Currency
